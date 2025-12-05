@@ -1,9 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>property-inspector</title>
     <script>
-      let update = () => {};
-
+      console.log("Entering my index.html");
       function connectOpenActionSocket(
         inPort,
         inPropertyInspectorUUID,
@@ -11,82 +14,21 @@
         inInfo,
         inActionInfo
       ) {
-        const websocket = new WebSocket("ws://localhost:" + inPort);
-        inActionInfo = JSON.parse(inActionInfo);
-        websocket.onopen = () => {
-          websocket.send(
-            JSON.stringify({
-              event: inRegisterEvent,
-              uuid: inPropertyInspectorUUID,
-            })
-          );
-        };
-
-        const value = document.getElementById("value");
-        value.value = inActionInfo.payload.settings.value ?? 0;
-
-        websocket.onmessage = (event) => {
-          const data = JSON.parse(event.data);
-          if (data.event == "didReceiveSettings") {
-            value.value = data.payload.settings.value ?? 0;
-          }
-        };
-
-        const step = document.getElementById("step");
-        step.value = inActionInfo.payload.settings.step ?? 1;
-
-        update = () => {
-          websocket.send(
-            JSON.stringify({
-              event: "logMessage",
-              payload: {
-                message: JSON.stringify({
-                  step: parseInt(step.value) ?? 1,
-                  value: parseInt(value.value) ?? 0,
-                }),
-              },
-            })
-          );
-
-          websocket.send(
-            JSON.stringify({
-              event: "setSettings",
-              context: inActionInfo.context,
-              payload: {
-                step: parseInt(step.value) ?? 1,
-                value: parseInt(value.value) ?? 0,
-              },
-            })
-          );
+        console.log("Entering connectOpenActionSocket");
+        window.connectionData = {
+          inPort,
+          inPropertyInspectorUUID,
+          inRegisterEvent,
+          inInfo,
+          inActionInfo,
         };
       }
 
       const connectElgatoStreamDeckSocket = connectOpenActionSocket;
     </script>
   </head>
-
-  <body class="bg-gray-900 text-gray-200 p-4 font-sans text-base">
-    <div class="flex flex-col gap-4">
-      <div class="flex items-center">
-        <label for="value" class="mr-1">Current value:</label>
-        <input
-          id="value"
-          oninput="update();"
-          type="number"
-          class="p-1 bg-gray-800 border border-gray-600 rounded w-24 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-        />
-      </div>
-      <div class="flex items-center">
-        <label for="step" class="mr-1">Step:</label>
-        <input
-          id="step"
-          oninput="update();"
-          type="number"
-          class="p-1 bg-gray-800 border border-gray-600 rounded w-24 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-        />
-      </div>
-    </div>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.jsx"></script>
   </body>
-
-  <script type="module" src="/src/main.ts"></script>
 </html>

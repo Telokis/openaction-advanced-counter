@@ -1,5 +1,6 @@
 use openaction::*;
 
+use log::debug;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -62,6 +63,16 @@ impl Action for AdvancedCounterAction {
   ) -> OpenActionResult<()> {
     increment(instance, settings, settings.step * (ticks as isize)).await
   }
+
+  async fn did_receive_settings(
+    &self,
+    instance: &Instance,
+    settings: &Self::Settings,
+  ) -> OpenActionResult<()> {
+    instance
+      .set_title(Some(settings.value.to_string()), None)
+      .await
+  }
 }
 
 #[tokio::main]
@@ -78,7 +89,7 @@ async fn main() -> OpenActionResult<()> {
     }
   }
 
-  eprintln!("Setting up Advanced Counter.");
+  debug!("Setting up Advanced Counter.");
 
   register_action(AdvancedCounterAction).await;
 
