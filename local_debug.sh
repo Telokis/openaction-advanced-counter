@@ -31,6 +31,11 @@ echo "Copy assets to plugin folder"
 cp -v assets/* plugin/
 
 echo
+echo "Build property inspector"
+(cd property-inspector && bun run build)
+cp -rv property-inspector/dist/index.html plugin/property-inspector.html
+
+echo
 echo "Copying files into a debug opendeck plugin"
 ln -sfv "$PWD/plugin" "$HOME/.config/opendeck/plugins/"
 
