@@ -6,7 +6,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>property-inspector</title>
     <script>
-      console.log("Entering my index.html");
+      // Function defined by the app to subscribe to the data
+      window.onDeckConnected = null;
+
+      // Vite forces the use of `type="module"` which breaks `window` handling.
+      window.registerCallback = function (callback) {
+        window.onDeckConnected = callback;
+
+        // If the data has already been retrieved, we call it directly.
+        if (window.connectionData) {
+          callback(window.connectionData);
+        }
+      };
+
       function connectOpenActionSocket(
         inPort,
         inPropertyInspectorUUID,
@@ -14,7 +26,6 @@
         inInfo,
         inActionInfo
       ) {
-        console.log("Entering connectOpenActionSocket");
         window.connectionData = {
           inPort,
           inPropertyInspectorUUID,
@@ -22,6 +33,8 @@
           inInfo,
           inActionInfo,
         };
+
+        window.onDeckConnected?.(window.connectionData);
       }
 
       const connectElgatoStreamDeckSocket = connectOpenActionSocket;

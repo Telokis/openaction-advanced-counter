@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "preact/hooks";
 
 export function App() {
-  console.log("Entering App render");
+  const [pluginData, setPluginData] = useState(window.connectionData);
   const [value, setValue] = useState(0);
   const [step, setStep] = useState(1);
 
@@ -10,7 +10,15 @@ export function App() {
   const contextRef = useRef(null);
 
   useEffect(() => {
-    console.log("Entering useEffect");
+    window.registerCallback((data) => {
+      setPluginData(data);
+    });
+  }, [setPluginData]);
+
+  useEffect(() => {
+    if (!pluginData) {
+      return;
+    }
 
     const {
       inPort,
@@ -18,7 +26,7 @@ export function App() {
       inRegisterEvent,
       inInfo,
       inActionInfo,
-    } = window.connectionData; // Object defined in the index.html so it's properly synchronous
+    } = pluginData;
 
     const ws = new WebSocket(`ws://localhost:${inPort}`);
     socketRef.current = ws;
@@ -61,7 +69,7 @@ export function App() {
         }
       }
     };
-  }, [setValue, setStep]);
+  }, [setValue, setStep, pluginData]);
 
   // Helper to send data to Stream Deck
   const saveSettings = (newValue, newStep) => {
