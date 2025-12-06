@@ -1,0 +1,33 @@
+name: Build Property Inspector
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+jobs:
+  build-property-inspector:
+    name: Build Property Inspector
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+      - name: Set up Node.js
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
+        with:
+          node-version: "24"
+
+      - name: Install dependencies
+        working-directory: property-inspector
+        run: npm ci
+
+      - name: Build property inspector
+        working-directory: property-inspector
+        run: npm run build
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        with:
+          name: property-inspector
+          path: property-inspector/dist/
+          compression-level: 0

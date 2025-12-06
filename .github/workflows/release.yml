@@ -1,0 +1,60 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build:
+    name: Build Binaries
+    uses: ./.github/workflows/build.yml
+
+  build-property-inspector:
+    name: Build Property Inspector
+    uses: ./.github/workflows/build-property-inspector.yml
+
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    needs: [build, build-property-inspector]
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+      - name: Extract version from tag
+        id: version
+        run: echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Run prepare_folder.sh to set up plugin structure
+        run: ./scripts/prepare_folder.sh
+
+      - name: Copy binaries from artifacts to plugin/bin
+        run: |
+          cp artifacts/openaction-advanced-counter-* plugin/bin/
+          chmod +x plugin/bin/*
+
+      - name: Copy property inspector from artifacts
+        run: cp -r artifacts/property-inspector/* plugin/property-inspector/
+
+      - name: Create zip with proper structure
+        run: |
+          mkdir com.telokis.advanced-counter
+          cp -r plugin/* com.telokis.advanced-counter/
+          zip -r com.telokis.advanced-counter.zip com.telokis.advanced-counter
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
+        with:
+          name: v${{ steps.version.outputs.version }}
+          files: com.telokis.advanced-counter.zip
+          draft: false
+          prerelease: false

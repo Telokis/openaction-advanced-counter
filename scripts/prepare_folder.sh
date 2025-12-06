@@ -23,10 +23,13 @@ echo
 echo "Creating directory structure"
 mkdir plugin/bin plugin/images plugin/property-inspector
 
-echo
-echo "Build and copy plugin"
-cargo build
-cp -v target/debug/openaction-advanced-counter plugin/bin/oa-advanced-counter-x86_64-unknown-linux-gnu
+# In the CI, the build is done by a matrix so we skip it
+if [ -z "$CI" ]; then
+  echo
+  echo "Build and copy plugin"
+  cargo build
+  cp -v target/debug/openaction-advanced-counter plugin/bin/openaction-advanced-counter-x86_64-unknown-linux-gnu
+fi
 
 echo
 echo "Copy manifest.json to plugin folder"
@@ -36,10 +39,13 @@ echo
 echo "Copy assets to plugin folder"
 cp -rv images plugin/
 
-echo
-echo "Build property inspector"
-(cd property-inspector && npm run build)
-cp -rv property-inspector/dist/index.html plugin/property-inspector/index.html
+# In the CI, the property inspector is already built by a separate job
+if [ -z "$CI" ]; then
+  echo
+  echo "Build property inspector"
+  (cd property-inspector && npm run build)
+  cp -rv property-inspector/dist/* plugin/property-inspector/
+fi
 
 echo
 echo "Plugin folder is ready to use."
