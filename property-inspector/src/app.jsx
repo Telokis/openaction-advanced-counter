@@ -6,7 +6,8 @@ export function App() {
   const [value, setValue] = useState(0);
   const [step, setStep] = useState(1);
   const [file, setFile] = useState(null);
-  const [pattern, setPattern] = useState("Counter value is {}");
+  const [pattern, setPattern] = useState(null);
+  const [isOutputExpanded, setIsOutputExpanded] = useState(false);
 
   // Use Refs to store non-visual state that persists across renders
   const socketRef = useRef(null);
@@ -39,18 +40,26 @@ export function App() {
 
     const settings = actionInfo.payload.settings;
 
-    if ("value" in settings) {
-      setValue(settings.value);
+    function updateValuesFromSettings(settings) {
+      if ("value" in settings) {
+        setValue(settings.value);
+      }
+      if ("step" in settings) {
+        setStep(settings.step);
+      }
+      if ("file" in settings) {
+        setFile(settings.file);
+
+        if (typeof settings.file === "string" && settings.file.length > 0) {
+          setIsOutputExpanded(true);
+        }
+      }
+      if ("pattern" in settings) {
+        setPattern(settings.pattern);
+      }
     }
-    if ("step" in settings) {
-      setStep(settings.step);
-    }
-    if ("file" in settings) {
-      setFile(settings.file);
-    }
-    if ("pattern" in settings) {
-      setPattern(settings.pattern);
-    }
+
+    updateValuesFromSettings(settings);
 
     ws.onopen = () => {
       ws.send(
@@ -73,22 +82,22 @@ export function App() {
       if (data.event === "didReceiveSettings") {
         const newSettings = data.payload.settings;
 
-        if (newSettings.value !== undefined) {
-          setValue(newSettings.value);
-        }
+        updateValuesFromSettings(newSettings);
       }
     };
   }, [setValue, setStep, setFile, setPattern, pluginData]);
 
   // Helper to send data to Stream Deck
-  const saveSettings = (newValue, newStep) => {
+  const saveSettings = (value, step, file, pattern) => {
     if (socketRef.current) {
       const payload = {
         event: "setSettings",
         context: contextRef.current,
         payload: {
-          value: parseInt(newValue) || 0,
-          step: parseInt(newStep) || 1,
+          value,
+          step,
+          file,
+          pattern,
         },
       };
       socketRef.current.send(JSON.stringify(payload));
@@ -98,13 +107,35 @@ export function App() {
   const handleValueChange = (e) => {
     const val = e.target.value;
     setValue(val);
-    saveSettings(val, step);
+    saveSettings(val, step, file, pattern);
   };
 
   const handleStepChange = (e) => {
     const val = e.target.value;
     setStep(val);
-    saveSettings(value, val);
+    saveSettings(value, val, file, pattern);
+  };
+
+  const handleFileChange = (e) => {
+    let val = e.target.value;
+
+    if (val === "") {
+      val = null;
+    }
+
+    setFile(val);
+    saveSettings(value, step, val, pattern);
+  };
+
+  const handlePatternChange = (e) => {
+    let val = e.target.value;
+
+    if (val === "") {
+      val = null;
+    }
+
+    setPattern(val);
+    saveSettings(value, step, file, val);
   };
 
   return (
@@ -121,8 +152,8 @@ export function App() {
         </h1>
       </div>
 
-      <div class="text-steel-300 max-w-lg w-full">
-        <div class="text-center mb-8 bg-gray-900 p-4 rounded-2xl shadow-2xl border border-gray-800">
+      <div class="text-steel-300 max-w-lg w-full space-y-4">
+        <div class="text-center bg-gray-900 p-4 rounded-2xl shadow-2xl border border-gray-800">
           <div class="flex items-center justify-center gap-2">
             <label
               for="value"
@@ -163,6 +194,75 @@ export function App() {
               class="w-24 p-3 text-center font-bold focus:outline-none focus:ring-0 border-b-2 border-b-steel-500 hover:border-steel-400 focus:border-steel-400 text-steel-400 hover:text-steel-300 focus:text-steel-300"
             />
           </div>
+        </div>
+
+        <div className="bg-gray-900 rounded-2xl border border-gray-800 overflow-hidden">
+          <button
+            onClick={() => setIsOutputExpanded((oldVal) => !oldVal)}
+            className="hover:cursor-pointer w-full p-5 flex items-center justify-between hover:bg-gray-800/50 transition-colors"
+          >
+            <div className="flex items-center gap-2">
+              <span className="text-base font-semibold text-steel-300">
+                Output to File
+              </span>
+            </div>
+            <svg
+              className={`w-5 h-5 text-steel-400 transition-transform ${
+                isOutputExpanded ? "rotate-180" : ""
+              }`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+          </button>
+
+          {isOutputExpanded && (
+            <div className="px-5 pb-5 space-y-4 border-t border-gray-800">
+              <div className="pt-4">
+                <label
+                  htmlFor="file"
+                  className="text-sm font-semibold text-steel-300 block mb-2"
+                >
+                  File Path
+                </label>
+                <input
+                  id="file"
+                  type="text"
+                  value={file}
+                  onInput={handleFileChange}
+                  placeholder="/path/to/output.txt"
+                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-steel-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-steel-500 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="pattern"
+                  className="text-sm font-semibold text-steel-300 block mb-2"
+                >
+                  Pattern
+                </label>
+                <input
+                  id="pattern"
+                  type="text"
+                  value={pattern}
+                  onInput={handlePatternChange}
+                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-steel-100 focus:outline-none focus:ring-2 focus:ring-steel-500 focus:border-transparent"
+                />
+                <p className="text-sm text-gray-400 mt-2">
+                  Use <strong>&#123;&#125;</strong> as placeholder for the
+                  counter value
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

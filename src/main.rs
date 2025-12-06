@@ -1,7 +1,8 @@
 use openaction::*;
 
-use log::debug;
+use log::{debug, error};
 use serde::{Deserialize, Serialize};
+use std::fs;
 
 #[derive(Serialize, Deserialize, Clone)]
 #[serde(default)]
@@ -30,14 +31,35 @@ async fn increment(
   let mut clone = settings.clone();
   clone.value = settings.value + step;
 
-  if let Some(file_path) = &clone.file {
-    debug!("File path is {file_path}");
-  }
+  write_to_file(instance, &clone).await?;
 
   instance.set_settings(&clone).await?;
   instance
     .set_title(Some(clone.value.to_string()), None)
     .await
+}
+
+async fn write_to_file(
+  instance: &Instance,
+  settings: &AdvancedCounterSettings,
+) -> OpenActionResult<()> {
+  if let Some(file_path) = &settings.file {
+    let err = if let Some(pattern) = &settings.pattern {
+      fs::write(
+        file_path,
+        pattern.replace("{}", &settings.value.to_string()),
+      )
+    } else {
+      fs::write(file_path, settings.value.to_string())
+    };
+
+    if let Err(err) = err {
+      error!("Error when writing to file '{file_path}': {err}");
+      instance.show_alert().await?;
+    }
+  }
+
+  Ok(())
 }
 
 struct AdvancedCounterAction;
@@ -71,7 +93,9 @@ impl Action for AdvancedCounterAction {
   ) -> OpenActionResult<()> {
     instance
       .set_title(Some(settings.value.to_string()), None)
-      .await
+      .await?;
+
+    write_to_file(instance, settings).await
   }
 }
 
