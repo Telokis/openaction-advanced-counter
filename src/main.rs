@@ -65,7 +65,7 @@ async fn write_to_file(
 struct AdvancedCounterAction;
 #[async_trait]
 impl Action for AdvancedCounterAction {
-  const UUID: ActionUuid = "me.telokis.oa-advanced-counter.counter";
+  const UUID: ActionUuid = "com.telokis.advanced-counter.counter";
   type Settings = AdvancedCounterSettings;
 
   async fn key_up(&self, instance: &Instance, settings: &Self::Settings) -> OpenActionResult<()> {

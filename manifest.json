@@ -28,7 +28,7 @@
   "PropertyInspectorPath": "property-inspector/index.html",
   "Actions": [
     {
-      "UUID": "me.telokis.oa-advanced-counter.counter",
+      "UUID": "com.telokis.advanced-counter.counter",
       "Name": "Advanced Counter",
       "Icon": "images/logo",
       "Tooltip": "A counter that can output to a file",
