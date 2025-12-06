@@ -24,6 +24,10 @@ echo
 echo "Updating Cargo.toml"
 sed -i "s/^version = \".*\"/version = \"$VERSION\"/" Cargo.toml
 
+echo "Updating Cargo.lock"
+PACKAGE_NAME=$(cargo metadata --no-deps --format-version 1 | jq -r ".packages[0].name")
+cargo update -p "$PACKAGE_NAME"
+
 echo "Updating manifest.json"
 sed -i "s/\"Version\": \".*\"/\"Version\": \"$VERSION\"/" manifest.json
 
@@ -32,7 +36,7 @@ echo "Updating property-inspector/package.json"
 
 echo
 echo "Staging changes"
-git add Cargo.toml manifest.json property-inspector/package.json
+git add Cargo.toml Cargo.lock manifest.json property-inspector/package.json property-inspector/package-lock.json
 
 echo
 echo "Creating commit"
