@@ -105,13 +105,13 @@ export function App() {
   };
 
   const handleValueChange = (e) => {
-    const val = e.target.value;
+    const val = parseInt(e.target.value, 10);
     setValue(val);
     saveSettings(val, step, file, pattern);
   };
 
   const handleStepChange = (e) => {
-    const val = e.target.value;
+    const val = parseInt(e.target.value, 10);
     setStep(val);
     saveSettings(value, val, file, pattern);
   };

@@ -22,18 +22,23 @@ echo "Emptying 'plugin' folder"
 rm -rfv plugin/*
 
 echo
+echo "Creating directory structure"
+mkdir plugin/bin plugin/images plugin/property-inspector
+
+echo
 echo "Build and copy plugin"
 cargo build
-cp -v target/debug/openaction-advanced-counter plugin/oa-advanced-counter-x86_64-unknown-linux-gnu
+cp -v target/debug/openaction-advanced-counter plugin/bin/oa-advanced-counter-x86_64-unknown-linux-gnu
 
 echo
 echo "Copy assets to plugin folder"
-cp -v assets/* plugin/
+cp -v assets/manifest.json plugin/
+cp -v assets/*.png plugin/images/
 
 echo
 echo "Build property inspector"
 (cd property-inspector && bun run build)
-cp -rv property-inspector/dist/index.html plugin/property-inspector.html
+cp -rv property-inspector/dist/index.html plugin/property-inspector/index.html
 
 echo
 echo "Copying files into a debug opendeck plugin"

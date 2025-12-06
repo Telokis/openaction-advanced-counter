@@ -3,7 +3,7 @@
   "Author": "Telokis",
   "Version": "1.0.0",
   "Category": "Counter",
-  "Icon": "icon",
+  "Icon": "images/logo",
   "OS": [
     {
       "Platform": "windows"
@@ -15,22 +15,15 @@
       "Platform": "linux"
     }
   ],
-  "CodePaths": {
-    "x86_64-pc-windows-msvc": "oa-advanced-counter-x86_64-pc-windows-msvc.exe",
-    "x86_64-apple-darwin": "oa-advanced-counter-x86_64-apple-darwin",
-    "aarch64-apple-darwin": "oa-advanced-counter-aarch64-apple-darwin",
-    "x86_64-unknown-linux-gnu": "oa-advanced-counter-x86_64-unknown-linux-gnu",
-    "aarch64-unknown-linux-gnu": "oa-advanced-counter-aarch64-unknown-linux-gnu"
-  },
-  "CodePathWin": "oa-advanced-counter-x86_64-pc-windows-msvc.exe",
-  "CodePathMac": "oa-advanced-counter-x86_64-apple-darwin",
-  "CodePathLin": "oa-advanced-counter-x86_64-unknown-linux-gnu",
-  "PropertyInspectorPath": "property-inspector.html",
+  "CodePathWin": "bin/oa-advanced-counter-x86_64-pc-windows-msvc.exe",
+  "CodePathMac": "bin/oa-advanced-counter-x86_64-apple-darwin",
+  "CodePathLin": "bin/oa-advanced-counter-x86_64-unknown-linux-gnu",
+  "PropertyInspectorPath": "property-inspector/index.html",
   "Actions": [
     {
-      "UUID": "me.telokis.oa-advanced-counter.persisted",
+      "UUID": "me.telokis.oa-advanced-counter.counter",
       "Name": "Advanced Counter",
-      "Icon": "icon",
+      "Icon": "images/logo",
       "Tooltip": "A counter that can output to a file",
       "Controllers": [
         "Keypad",
@@ -38,6 +31,8 @@
       ],
       "States": [
         {
+          "Image": "images/background",
+          "FontSize": 20,
           "Title": "0"
         }
       ]
