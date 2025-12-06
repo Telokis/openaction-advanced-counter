@@ -31,7 +31,7 @@ async fn increment(
   clone.value = settings.value + step;
 
   if let Some(file_path) = &clone.file {
-    println!("File path is {file_path}");
+    debug!("File path is {file_path}");
   }
 
   instance.set_settings(&clone).await?;
