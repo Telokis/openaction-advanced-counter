@@ -19,7 +19,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: property-inspector
-        run: npm ci
+        run: npm i
 
       - name: Build property inspector
         working-directory: property-inspector
