@@ -161,7 +161,10 @@ export function App() {
             >
               Current Value
             </label>
-            <HelpTooltip text="Change this to directly set the current value to whatever you want." />
+            <HelpTooltip>
+              Change this to directly set the current value to whatever you
+              want.
+            </HelpTooltip>
           </div>
           <input
             id="value"
@@ -182,7 +185,10 @@ export function App() {
                 >
                   Step Increment
                 </label>
-                <HelpTooltip text="Configure how the counter changes with each button press. Can be negative." />
+                <HelpTooltip>
+                  Configure how the counter changes with each button press. Can
+                  be negative.
+                </HelpTooltip>
               </div>
               <p class="text-sm text-gray-300 mt-1">Change per step</p>
             </div>
@@ -196,7 +202,7 @@ export function App() {
           </div>
         </div>
 
-        <div className="bg-gray-900 rounded-2xl border border-gray-800 overflow-hidden">
+        <div className="bg-gray-900 rounded-2xl border border-gray-800">
           <button
             onClick={() => setIsOutputExpanded((oldVal) => !oldVal)}
             className="hover:cursor-pointer w-full p-5 flex items-center justify-between hover:bg-gray-800/50 transition-colors"
@@ -243,22 +249,30 @@ export function App() {
               </div>
 
               <div>
-                <label
-                  htmlFor="pattern"
-                  className="text-sm font-semibold text-steel-300 block mb-2"
-                >
-                  Pattern
-                </label>
+                <div class="flex gap-2">
+                  <label
+                    htmlFor="pattern"
+                    className="text-sm font-semibold text-steel-300 block mb-2"
+                  >
+                    Pattern
+                  </label>
+                  <HelpTooltip>
+                    What should be written to the file. <br />
+                    Use <strong>&#123;&#125;</strong> as placeholder for the
+                    counter value
+                  </HelpTooltip>
+                </div>
                 <input
                   id="pattern"
                   type="text"
                   value={pattern}
                   onInput={handlePatternChange}
+                  placeholder="Counter value is {}"
                   className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-steel-100 focus:outline-none focus:ring-2 focus:ring-steel-500 focus:border-transparent"
                 />
-                <p className="text-sm text-gray-400 mt-2">
-                  Use <strong>&#123;&#125;</strong> as placeholder for the
-                  counter value
+                <p className="text-sm text-gray-400 mt-2 italic">
+                  Example :{" "}
+                  {(pattern ?? "Counter value is {}").replaceAll("{}", "15")}
                 </p>
               </div>
             </div>
