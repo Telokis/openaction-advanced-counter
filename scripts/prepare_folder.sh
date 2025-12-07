@@ -34,6 +34,7 @@ fi
 echo
 echo "Copy manifest.json to plugin folder"
 cp -v manifest.json plugin/
+cp -v README.md LICENSE plugin/
 
 echo
 echo "Copy assets to plugin folder"
