@@ -12,12 +12,20 @@ export function App() {
   // Use Refs to store non-visual state that persists across renders
   const socketRef = useRef(null);
   const contextRef = useRef(null);
+  const fileDebounceRef = useRef(null); // We need to generously debounce the filepath to avoid creating a ton of files
 
   useEffect(() => {
     window.registerCallback((data) => {
       setPluginData(data);
     });
   }, [setPluginData]);
+
+  // Cleanup debounce timeout on unmount
+  useEffect(() => {
+    return () => {
+      clearTimeout(fileDebounceRef.current);
+    };
+  }, []);
 
   useEffect(() => {
     if (!pluginData) {
@@ -124,7 +132,12 @@ export function App() {
     }
 
     setFile(val);
-    saveSettings(value, step, val, pattern);
+
+    // We need to properly debounce the file path update
+    clearTimeout(fileDebounceRef.current);
+    fileDebounceRef.current = setTimeout(() => {
+      saveSettings(value, step, val, pattern);
+    }, 1000);
   };
 
   const handlePatternChange = (e) => {
