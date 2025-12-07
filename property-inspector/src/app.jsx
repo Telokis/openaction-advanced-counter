@@ -272,7 +272,8 @@ export function App() {
                   <HelpTooltip>
                     What should be written to the file. <br />
                     Use <strong>&#123;&#125;</strong> as placeholder for the
-                    counter value
+                    counter value. <br />
+                    An empty pattern will output the counter value by itself
                   </HelpTooltip>
                 </div>
                 <input
@@ -284,8 +285,7 @@ export function App() {
                   className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-steel-100 focus:outline-none focus:ring-2 focus:ring-steel-500 focus:border-transparent"
                 />
                 <p className="text-sm text-gray-400 mt-2 italic">
-                  Example :{" "}
-                  {(pattern ?? "Counter value is {}").replaceAll("{}", "15")}
+                  Example : {(pattern ?? "{}").replaceAll("{}", "15")}
                 </p>
               </div>
             </div>
