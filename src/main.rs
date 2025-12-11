@@ -4,6 +4,9 @@ use log::{debug, error};
 use serde::{Deserialize, Serialize};
 use std::fs;
 
+mod adapter_example;
+mod test_task;
+
 #[derive(Serialize, Deserialize, Clone)]
 #[serde(default)]
 struct AdvancedCounterSettings {
@@ -63,6 +66,7 @@ async fn write_to_file(
 }
 
 struct AdvancedCounterAction;
+
 #[async_trait]
 impl Action for AdvancedCounterAction {
   const UUID: ActionUuid = "com.telokis.advanced-counter.counter";
@@ -111,6 +115,13 @@ async fn main() -> OpenActionResult<()> {
     ) {
       eprintln!("Logger initialization failed: {}", error);
     }
+  }
+
+  #[cfg(feature = "test-task")]
+  {
+    println!("Running test tasks...");
+    test_task::cancellable_repeating_task().await;
+    return Ok(());
   }
 
   debug!("Setting up Advanced Counter.");
