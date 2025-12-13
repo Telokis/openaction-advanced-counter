@@ -47,9 +47,9 @@ jobs:
 
       - name: Create zip with proper structure
         run: |
-          mkdir com.telokis.advanced-counter
-          cp -r plugin/* com.telokis.advanced-counter/
-          zip -r com.telokis.advanced-counter.zip com.telokis.advanced-counter
+          mkdir com.telokis.advanced-counter.sdPlugin
+          cp -r plugin/* com.telokis.advanced-counter.sdPlugin/
+          zip -r com.telokis.advanced-counter.zip com.telokis.advanced-counter.sdPlugin
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
