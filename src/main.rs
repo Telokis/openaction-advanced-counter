@@ -4,6 +4,20 @@ use log::{debug, error};
 use serde::{Deserialize, Serialize};
 use std::fs;
 
+#[derive(Serialize, Deserialize, Default, Clone)]
+#[serde(default)]
+struct FileErrorMessage {
+  error: String,
+}
+
+impl FileErrorMessage {
+  pub fn from_err(err: std::io::Error) -> Self {
+    Self {
+      error: err.to_string(),
+    }
+  }
+}
+
 #[derive(Serialize, Deserialize, Clone)]
 #[serde(default)]
 struct AdvancedCounterSettings {
@@ -56,6 +70,9 @@ async fn write_to_file(
     if let Err(err) = err {
       error!("Error when writing to file '{file_path}': {err}");
       instance.show_alert().await?;
+      instance
+        .send_to_property_inspector(FileErrorMessage::from_err(err))
+        .await?;
     }
   }
 

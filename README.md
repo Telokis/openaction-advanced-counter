@@ -14,6 +14,7 @@
 - **Multi-Input Support**: Works with both buttons (Keypad) and dials (Encoder)
 - **Direct Value Setting**: Manually set any counter value through the property inspector
 - **Cross-Platform**: Supports Windows, macOS (Intel & Apple Silicon), and Linux (x86_64 & ARM64)
+- **Error feedback**: Displays clear error messages when something unexpected happens but still keeps track of your counter!
 
 ## Installation
 
@@ -26,6 +27,8 @@
 ### Configuration
 
 After adding the plugin to your profile, you can acces its configuration interface.
+
+![Configuration interface](./.github/property-inspector.png "Configuration interface")
 
 #### Counter Settings
 
@@ -47,6 +50,18 @@ After adding the plugin to your profile, you can acces its configuration interfa
 - **Button Press**: Increment by the step value
 - **Dial Rotation**: Change counter by step × rotation amount
 - **Dial Press**: Same as button press
+
+### Errors when writing file
+
+You may encounter errors if something is wrong with the specified file path.  
+Common errors may include:
+- **Path is nested (Most common)**: The action will not create directories, only the final file. Make sure the parent directory of your path already exists.
+- **Permission error**: The action doesn't have permission to write at the specified path.
+- **Path is a directory**: The action expects a file, if the path is a directory, there will be an error.
+
+When an error occurs, you will notice an alert on your stream deck. Open the configuration interface to get more information.
+
+![Error example](./.github/property-inspector-error.png "Configuration interface showing file path error")
 
 ## Development
 

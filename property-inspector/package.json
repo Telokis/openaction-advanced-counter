@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "clsx": "^2.1.1",
     "preact": "^10.27.2",
     "tailwindcss": "^4.1.17",
     "vite": "^7.2.6"

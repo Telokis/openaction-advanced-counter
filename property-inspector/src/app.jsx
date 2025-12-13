@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef } from "preact/hooks";
 import HelpTooltip from "./components/HelpTooltip";
+import clsx from "clsx";
 
 export function App() {
   const [pluginData, setPluginData] = useState(window.connectionData);
   const [value, setValue] = useState(0);
   const [step, setStep] = useState(1);
   const [file, setFile] = useState(null);
+  const [fileError, setFileError] = useState(null);
   const [pattern, setPattern] = useState(null);
   const [isOutputExpanded, setIsOutputExpanded] = useState(false);
 
@@ -87,16 +89,25 @@ export function App() {
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
+
       if (data.event === "didReceiveSettings") {
         const newSettings = data.payload.settings;
 
         updateValuesFromSettings(newSettings);
+      } else if (data.event === "sendToPropertyInspector") {
+        const payload = data.payload;
+
+        setFileError(payload.error);
       }
     };
   }, [setValue, setStep, setFile, setPattern, pluginData]);
 
   // Helper to send data to Stream Deck
   const saveSettings = (value, step, file, pattern) => {
+    // console.log(
+    //   `Saving settings: value=${value}, step=${step}, file=${file}, pattern=${pattern}`
+    // );
+
     if (socketRef.current) {
       const payload = {
         event: "setSettings",
@@ -137,6 +148,7 @@ export function App() {
     clearTimeout(fileDebounceRef.current);
     fileDebounceRef.current = setTimeout(() => {
       saveSettings(value, step, val, pattern);
+      setFileError(null);
     }, 1000);
   };
 
@@ -199,8 +211,10 @@ export function App() {
                   Step Increment
                 </label>
                 <HelpTooltip>
-                  Configure how the counter changes with each button press. Can
-                  be negative.
+                  <p>
+                    Configure how the counter changes with each button press.
+                  </p>
+                  <p>Can be negative.</p>
                 </HelpTooltip>
               </div>
               <p class="text-sm text-gray-300 mt-1">Change per step</p>
@@ -245,20 +259,38 @@ export function App() {
           {isOutputExpanded && (
             <div className="px-5 pb-5 space-y-4 border-t border-gray-800">
               <div className="pt-4">
-                <label
-                  htmlFor="file"
-                  className="text-sm font-semibold text-steel-300 block mb-2"
-                >
-                  File Path
-                </label>
+                <div class="flex gap-2">
+                  <label
+                    htmlFor="file"
+                    className="text-sm font-semibold text-steel-300 block mb-2"
+                  >
+                    File Path
+                  </label>
+                  <HelpTooltip>
+                    <p>Path to the file to write the info into.</p>
+                    <p>
+                      The file will be automatically created but not its parent
+                      directory.
+                    </p>
+                    <p>Leave empty to disable writing to a file.</p>
+                  </HelpTooltip>
+                </div>
                 <input
                   id="file"
                   type="text"
                   value={file}
                   onInput={handleFileChange}
                   placeholder="/path/to/output.txt"
-                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-steel-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-steel-500 focus:border-transparent"
+                  className={clsx(
+                    "w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-steel-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-steel-500 focus:border-transparent",
+                    fileError && "border-red-500"
+                  )}
                 />
+                {fileError && (
+                  <p className="ml-2 mt-0 text-red-500 bold">
+                    Error : {fileError}
+                  </p>
+                )}
               </div>
 
               <div>
@@ -270,10 +302,14 @@ export function App() {
                     Pattern
                   </label>
                   <HelpTooltip>
-                    What should be written to the file. <br />
-                    Use <strong>&#123;&#125;</strong> as placeholder for the
-                    counter value. <br />
-                    An empty pattern will output the counter value by itself
+                    <p>What should be written to the file.</p>
+                    <p>
+                      Use <strong>&#123;&#125;</strong> as placeholder for the
+                      counter value.
+                    </p>
+                    <p>
+                      An empty pattern will output the counter value by itself
+                    </p>
                   </HelpTooltip>
                 </div>
                 <input
