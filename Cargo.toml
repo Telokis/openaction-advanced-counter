@@ -4,6 +4,7 @@ version = "0.0.9"
 edition = "2024"
 
 [dependencies]
+expanduser = "1.2.2"
 log = "0.4.28"
 openaction = "2.2.0"
 serde = "1.0.228"

@@ -1,3 +1,4 @@
+use expanduser::expanduser;
 use openaction::*;
 
 use log::{debug, error};
@@ -58,21 +59,34 @@ async fn write_to_file(
   settings: &AdvancedCounterSettings,
 ) -> OpenActionResult<()> {
   if let Some(file_path) = &settings.file {
-    let err = if let Some(pattern) = &settings.pattern {
-      fs::write(
-        file_path,
-        pattern.replace("{}", &settings.value.to_string()),
-      )
-    } else {
-      fs::write(file_path, settings.value.to_string())
-    };
+    let expanded_file_path = expanduser(file_path); // Handles '~/'
 
-    if let Err(err) = err {
-      error!("Error when writing to file '{file_path}': {err}");
-      instance.show_alert().await?;
-      instance
-        .send_to_property_inspector(FileErrorMessage::from_err(err))
-        .await?;
+    match expanded_file_path {
+      Err(err) => {
+        error!("Error when expanding file path '{file_path}': {err}");
+        instance.show_alert().await?;
+        instance
+          .send_to_property_inspector(FileErrorMessage::from_err(err))
+          .await?;
+      }
+      Ok(expanded_file_path) => {
+        let err = if let Some(pattern) = &settings.pattern {
+          fs::write(
+            expanded_file_path,
+            pattern.replace("{}", &settings.value.to_string()),
+          )
+        } else {
+          fs::write(expanded_file_path, settings.value.to_string())
+        };
+
+        if let Err(err) = err {
+          error!("Error when writing to file '{file_path}': {err}");
+          instance.show_alert().await?;
+          instance
+            .send_to_property_inspector(FileErrorMessage::from_err(err))
+            .await?;
+        }
+      }
     }
   }
 
