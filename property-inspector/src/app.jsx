@@ -14,20 +14,12 @@ export function App() {
   // Use Refs to store non-visual state that persists across renders
   const socketRef = useRef(null);
   const contextRef = useRef(null);
-  const fileDebounceRef = useRef(null); // We need to generously debounce the filepath to avoid creating a ton of files
 
   useEffect(() => {
     window.registerCallback((data) => {
       setPluginData(data);
     });
   }, [setPluginData]);
-
-  // Cleanup debounce timeout on unmount
-  useEffect(() => {
-    return () => {
-      clearTimeout(fileDebounceRef.current);
-    };
-  }, []);
 
   useEffect(() => {
     if (!pluginData) {
@@ -104,9 +96,9 @@ export function App() {
 
   // Helper to send data to Stream Deck
   const saveSettings = (value, step, file, pattern) => {
-    // console.log(
-    //   `Saving settings: value=${value}, step=${step}, file=${file}, pattern=${pattern}`
-    // );
+    console.log(
+      `Saving settings: value=${value}, step=${step}, file=${file}, pattern=${pattern}`
+    );
 
     if (socketRef.current) {
       const payload = {
@@ -135,7 +127,12 @@ export function App() {
     saveSettings(value, val, file, pattern);
   };
 
-  const handleFileChange = (e) => {
+  const handleFileConfirm = (val) => {
+    saveSettings(value, step, val, pattern);
+    setFileError(null);
+  };
+
+  const handleFileKeyUp = (e) => {
     let val = e.target.value;
 
     if (val === "") {
@@ -144,12 +141,9 @@ export function App() {
 
     setFile(val);
 
-    // We need to properly debounce the file path update
-    clearTimeout(fileDebounceRef.current);
-    fileDebounceRef.current = setTimeout(() => {
-      saveSettings(value, step, val, pattern);
-      setFileError(null);
-    }, 1000);
+    if (e.key === "Enter") {
+      handleFileConfirm(val);
+    }
   };
 
   const handlePatternChange = (e) => {
@@ -275,17 +269,28 @@ export function App() {
                     <p>Leave empty to disable writing to a file.</p>
                   </HelpTooltip>
                 </div>
-                <input
-                  id="file"
-                  type="text"
-                  value={file}
-                  onInput={handleFileChange}
-                  placeholder="/path/to/output.txt"
-                  className={clsx(
-                    "w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-steel-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-steel-500 focus:border-transparent",
-                    fileError && "border-red-500"
-                  )}
-                />
+                <div className="flex">
+                  <input
+                    id="file"
+                    type="text"
+                    value={file}
+                    onKeyUp={handleFileKeyUp}
+                    placeholder="/path/to/output.txt"
+                    className={clsx(
+                      "peer w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-l-lg text-steel-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-steel-500 focus:border-transparent",
+                      fileError && "border-red-500"
+                    )}
+                  />
+                  <button
+                    onClick={() => {
+                      handleFileConfirm(file);
+                    }}
+                    className="px-2 cursor-pointer bg-steel-500 text-white rounded-r-lg outline-none peer-focus:ring-2 peer-focus:ring-steel-500 hover:inset-shadow-sm/40 active:inset-shadow-sm/90"
+                  >
+                    Confirm
+                  </button>
+                </div>
+
                 {fileError && (
                   <p className="ml-2 mt-0 text-red-500 bold">
                     Error : {fileError}
